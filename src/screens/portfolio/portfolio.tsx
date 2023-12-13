@@ -1,13 +1,23 @@
 import React, {useEffect, useState, useMemo} from 'react';
-import {FlatList, SafeAreaView, View, Text, StatusBar} from 'react-native';
+import {
+  FlatList,
+  SafeAreaView,
+  View,
+  Text,
+  StatusBar,
+  ActivityIndicator,
+} from 'react-native';
 import {styles} from './styles';
 import {PortfolioProps} from './types';
 import {Header} from '../../components/header/header';
 import {PortfolioCard} from '../../components/portfolioCard/portfolio';
+import Colors from '../../constants/Colors';
 
 export const Portfolio = () => {
   const rupee = '₹';
   const [portfolio, setPortfolio] = useState<PortfolioProps[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     getPortfolio();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -25,8 +35,12 @@ export const Portfolio = () => {
           item.pnl = convertToDecimal(current - investment);
         });
         setPortfolio([...userHolding]);
+        setLoading(false);
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        setLoading(false);
+        console.log(error);
+      });
   };
 
   const convertToDecimal = (number: number) => {
@@ -87,50 +101,59 @@ export const Portfolio = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <Header title="Upstox Holding" />
-      <View style={styles.holdingsContainer}>
-        <FlatList
-          data={portfolio}
-          renderItem={renderPortfolio}
-          keyExtractor={(item, index) => index.toString()}
-          ItemSeparatorComponent={renderItemSeperator}
-        />
-      </View>
 
-      <View style={styles.totalContainer}>
-        <View style={styles.rowContainer}>
-          <Text style={styles.text18700}>Current Value:</Text>
-          <Text style={styles.text18500}>
-            {rupee}
-            {currentTotalValue}
-          </Text>
+      {loading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size={'large'} color={Colors.color_75147C} />
         </View>
-        <View style={styles.spacer} />
-        <View style={styles.rowContainer}>
-          <Text style={styles.text18700}>Total Investment:</Text>
-          <Text style={styles.text18500}>
-            {rupee}
-            {investmentTotalValue}
-          </Text>
-        </View>
-        <View style={styles.spacer} />
-        <View style={styles.rowContainer}>
-          <Text style={styles.text18700}>Today's Profit & Loss:</Text>
-          <Text style={styles.text18500}>
-            {rupee}
-            {todaysPnL}
-          </Text>
-        </View>
-        <View style={styles.spacer} />
+      ) : (
+        <>
+          <View style={styles.holdingsContainer}>
+            <FlatList
+              data={portfolio}
+              renderItem={renderPortfolio}
+              keyExtractor={(item, index) => index.toString()}
+              ItemSeparatorComponent={renderItemSeperator}
+            />
+          </View>
 
-        <View style={styles.spacer} />
-        <View style={styles.rowContainer}>
-          <Text style={styles.text18700}>Profit & Loss:</Text>
-          <Text style={styles.text18500}>
-            {rupee}
-            {totalPnL}
-          </Text>
-        </View>
-      </View>
+          <View style={styles.totalContainer}>
+            <View style={styles.rowContainer}>
+              <Text style={styles.text18700}>Current Value:</Text>
+              <Text style={styles.text18500}>
+                {rupee}
+                {currentTotalValue}
+              </Text>
+            </View>
+            <View style={styles.spacer} />
+            <View style={styles.rowContainer}>
+              <Text style={styles.text18700}>Total Investment:</Text>
+              <Text style={styles.text18500}>
+                {rupee}
+                {investmentTotalValue}
+              </Text>
+            </View>
+            <View style={styles.spacer} />
+            <View style={styles.rowContainer}>
+              <Text style={styles.text18700}>Today's Profit & Loss:</Text>
+              <Text style={styles.text18500}>
+                {rupee}
+                {todaysPnL}
+              </Text>
+            </View>
+            <View style={styles.spacer} />
+
+            <View style={styles.spacer} />
+            <View style={styles.rowContainer}>
+              <Text style={styles.text18700}>Profit & Loss:</Text>
+              <Text style={styles.text18500}>
+                {rupee}
+                {totalPnL}
+              </Text>
+            </View>
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 };
